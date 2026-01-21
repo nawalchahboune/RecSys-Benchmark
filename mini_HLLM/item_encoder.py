@@ -35,35 +35,51 @@ class ClueWebSeqDataset(Dataset):
 
     def _load_sequences(self):
         with self.input_path.open("r", encoding="utf-8") as f:
-            for i, line in enumerate(f):
+            for line in f:
                 line = line.strip()
                 if not line:
                     continue
-                # Skip header row
-                if i == 0:
+                try:
+                    # Handle two formats:
+                    # 1. TSV format: session_id \t comma-separated item IDs
+                    # 2. Space-separated format: item1 item2 item3 ...
+                    if '\t' in line:
+                        parts = line.split('\t')
+                        if len(parts) >= 2:
+                            item_ids = [int(tok) for tok in parts[1].split(',')]
+                        else:
+                            continue
+                    else:
+                        # Space-separated format (used in top1M filtered splits)
+                        item_ids = [int(tok) for tok in line.split()]
+                    self.sequences.append(item_ids)
+                except ValueError:
+                    # Skip lines that can't be parsed
                     continue
-                # TSV format: session_id \t comma-separated item IDs
-                parts = line.split('\t')
-                if len(parts) < 2:
-                    continue
-                item_ids = [int(tok) for tok in parts[1].split(',')]
-                self.sequences.append(item_ids)
 
     def _load_targets(self):
         self.targets = []
         with self.target_path.open("r", encoding="utf-8") as f:
-            for i, line in enumerate(f):
+            for line in f:
                 line = line.strip()
                 if not line:
                     continue
-                # Skip header row
-                if i == 0:
+                try:
+                    # Handle two formats:
+                    # 1. TSV format: session_id \t target_id
+                    # 2. Single value per line: target_id
+                    if '\t' in line:
+                        parts = line.split('\t')
+                        if len(parts) >= 2:
+                            self.targets.append(int(parts[1]))
+                        else:
+                            continue
+                    else:
+                        # Single value format (used in top1M filtered splits)
+                        self.targets.append(int(line))
+                except ValueError:
+                    # Skip lines that can't be parsed
                     continue
-                # TSV format: session_id \t target_id
-                parts = line.split('\t')
-                if len(parts) < 2:
-                    continue
-                self.targets.append(int(parts[1]))
 
     def __len__(self) -> int:
         return len(self.sequences)
