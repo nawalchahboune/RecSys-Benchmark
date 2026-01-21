@@ -1,9 +1,13 @@
+from __future__ import annotations
 from pathlib import Path
 from typing import Dict, List, Optional
 
 from torch.utils.data import DataLoader
 
 from item_encoder import ClueWebSeqDataset
+
+import struct
+from typing import List
 
 def load_seen_items(path: Path) -> List[int]:
     """Load the list of seen items"""
@@ -59,4 +63,34 @@ def get_dataloader(
         shuffle=shuffle,
     )
     return loader
+
+def save_orbit_bin(preds: List[List[int]], K: int, out_path: str) -> None:
+    """
+    preds: list of sessions; each is a list (len>=K) of cw_internal_id (int).
+    K:     number of items to keep per session (top-K).
+    out_path: where to write the .bin file.
+
+    Format:
+      <4 bytes uint32: num_sessions>
+      <4 bytes uint32: K>
+      <num_sessions * K * int32: predicted cw_internal_id>
+    """
+    num_sessions = len(preds)
+
+    with open(out_path, "wb") as f:
+        # write header
+        f.write(struct.pack("<I", num_sessions))  # num_sessions
+        f.write(struct.pack("<I", K))             # K
+
+        for row in preds:
+            # ensure length >= K, pad with 0 if needed
+            if len(row) < K:
+                row = row + [0] * (K - len(row))
+            else:
+                row = row[:K]
+
+            # write K int32
+            for x in row:
+                f.write(struct.pack("<i", int(x)))
+
     

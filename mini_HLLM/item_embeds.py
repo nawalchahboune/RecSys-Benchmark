@@ -9,40 +9,37 @@ from helpers import load_seen_items  # must return List[int] or Set[int]
 def load_item_texts_from_cwid_to_id(cwid_to_id_path: Path, seen_items: set[int]) -> dict[int, str]:
     """
     Minimal loader: read the mapping file and build item_id -> text.
-    IMPORTANT: adapt the column names once you inspect the header.
+    Format: cwid \t internal_id (no header)
     """
     item_text = {}
 
     with cwid_to_id_path.open("r", encoding="utf-8") as f:
-        reader = csv.DictReader(f, delimiter="\t")
-        # Print header once to verify field names
-        print("Columns:", reader.fieldnames)
-
-        for row in reader:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            
+            parts = line.split('\t')
+            if len(parts) < 2:
+                continue
+            
             try:
-                item_id = int(row.get("cw_internal_id") or row.get("internal_id") or row.get("item_id"))
-            except Exception:
+                cwid = parts[0]  # e.g., "clueweb22-en0014-00-00001"
+                item_id = int(parts[1])  # internal ID
+            except (ValueError, IndexError):
                 continue
 
             if item_id not in seen_items:
                 continue
 
-            # Try to build a short text (URL is often available; replace with title/snippet if you have them)
-            url = (row.get("url") or "").strip()
-            cwid = (row.get("cwid") or row.get("clueweb_id") or "").strip()
-
-            # Fallback text if you don't have real page content
-            text = url if url else cwid
-            if not text:
-                continue
-
-            item_text[item_id] = text
+            # Use cwid as text representation
+            item_text[item_id] = cwid
 
     return item_text
 
 
 def main():
-    model = SentenceTransformer("finetuned_item_embedder")  # checkpoint path
+    model = SentenceTransformer("checkpoints/item_embedder")  # checkpoint path
 
     data_dir = Path("../data/ClueWeb-Reco/ordered_id_splits")
 
@@ -76,10 +73,10 @@ def main():
     out_dir = Path("artifacts")
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    np.save(out_dir / "item_ids.npy", np.array(item_ids, dtype=np.int64))
-    np.save(out_dir / "item_embs.npy", embs.astype(np.float32))
-    print("Saved:", out_dir / "item_ids.npy")
-    print("Saved:", out_dir / "item_embs.npy")
+    np.save(out_dir / "item_ids_30.npy", np.array(item_ids, dtype=np.int64))
+    np.save(out_dir / "item_embs_30.npy", embs.astype(np.float32))
+    print("Saved:", out_dir / "item_ids_30.npy")
+    print("Saved:", out_dir / "item_embs_30.npy")
     print("Embeddings shape:", embs.shape)
 
 
