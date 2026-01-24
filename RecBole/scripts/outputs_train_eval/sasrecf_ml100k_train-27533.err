@@ -1,0 +1,1 @@
+srun: fatal: --cpus-per-task, --tres-per-task=cpu:#, and --cpus-per-gpu are mutually exclusive

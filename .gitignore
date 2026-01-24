@@ -6,3 +6,8 @@ wandb
 log_tensorboard
 checkpoints
 ClueWeb-Reco/demo/auth/api_keys.json
+.venv
+data-amzn
+data-ml
+Amazon_Beauty
+

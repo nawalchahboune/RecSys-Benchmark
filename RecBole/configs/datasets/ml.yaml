@@ -10,7 +10,11 @@ reproducibility: True
 
 # dataset info
 dataset: 
-data_path: /data/group_data/cx_group/REC/data
+# data_path: /data/group_data/cx_group/REC/data
+# data_path: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-ml/ml-100k
+data_path: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-ml
+# benchmark_filename: ['train', 'valid', 'test']
+benchmark_filename: ~
 load_col:
     inter: [user_id, item_id, rating, timestamp]
     item: ['item_id','movie_title','release_year','genre']
@@ -20,11 +24,12 @@ ITEM_ID_FIELD: item_id
 RATING_FIELD: rating
 TIME_FIELD: timestamp
 MAX_ITEM_LIST_LENGTH: 50
+# MAX_ITEM_LIST_LENGTH: 20
 
 # filtering 
 val_interval: ~
 filter_inter_by_user_or_item: True
-user_inter_num_interval: "[20,inf)"
-item_inter_num_interval: "[20,inf)"
+user_inter_num_interval: "[0,inf)"
+item_inter_num_interval: "[0,inf)"
 
 

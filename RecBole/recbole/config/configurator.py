@@ -599,6 +599,8 @@ class Config(object):
         if not isinstance(key, str):
             raise TypeError("index must be a str.")
         return key in self.final_config_dict
+    def get(self, key, default=None):
+        return self.final_config_dict.get(key, default)
 
     def __str__(self):
         args_info = "\n"

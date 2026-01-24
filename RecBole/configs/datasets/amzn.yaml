@@ -13,7 +13,7 @@ reproducibility: True
 
 # dataset info
 dataset: 
-data_path: /data/group_data/cx_group/REC/data
+data_path: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/Amazon_Beauty
 load_col:
     inter: [user_id, item_id, rating, timestamp]
     item: ['item_id','categories','average_rating','rating_number','title']

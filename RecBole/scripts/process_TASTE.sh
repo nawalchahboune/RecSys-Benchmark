@@ -1,52 +1,42 @@
 #!/bin/bash
-
-#SBATCH --job-name=process_data_TASTE 
-#SBATCH --output=outputs/%x-%j.out
-#SBATCH --error=outputs/%x-%j.err 
-#SBATCH --partition=general 
-
+#SBATCH --job-name=process_data_TASTE
+#SBATCH --partition=Odyssey
 #SBATCH --nodes=1
-
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --time=08:00:00
+#SBATCH --output=/Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/scripts/outputs/%x-%j.out
+#SBATCH --error=/Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/scripts/outputs/%x-%j.err
 
-#SBATCH --mem=16G
+set -euo pipefail
+mkdir -p /Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/scripts/outputs
 
-#SBATCH --gres=gpu:2
+# Sélection Python (sans activation)
+PY="/Odyssey/private/n23chahb/compet/RecSys-Benchmark/.venv/bin/python"
+if [[ ! -x "$PY" ]]; then
+  PY="python3"
+fi
+echo "Using Python: $PY"
 
-#SBATCH --time=48:00:00
-
-#SBATCH --mail-type=END
-#SBATCH --mail-user="jingyuah@cs.cmu.edu"
-
-
-
-# enter a config env
-eval "$(conda shell.bash hook)"
-conda activate recsys_ben
-
+export PYTHONPATH="/Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole:${PYTHONPATH:-}"
 
 # Configs
-model="SASRec"
-dataset_type="ml"
-dataset="ml-1m"
-
-# rewrite taste here, but leave model=SASRec just that Recbole detect a support model 
-exp_name="/data/group_data/cx_group/REC/checkpoints/TASTE_${dataset}"
-
-nproc=2
-
-source_dir="/home/jingyuah/RecSys-Benchmark/RecBole"
-
-model_config="${source_dir}/configs/models/${model}.yaml"
-data_config="${source_dir}/configs/datasets/${dataset_type}.yaml"
+model="SASRecF"
+dataset="ml-100k"
+source_dir="/Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole"
+data_config="${source_dir}/configs/datasets/ml.yaml"
 eval_config="${source_dir}/configs/eval.yaml"
+model_config="${source_dir}/configs/models/SASRecF.yaml"
+output_dir="benchmark_splits/${dataset}"
+DATA_ROOT="/Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-ml"
 
-cd $source_dir
+cd "$source_dir"
+ls -l "$DATA_ROOT/${dataset}/"{${dataset}.inter,${dataset}.item,${dataset}.user}
 
-python run_recbole.py  \
-    --dataset $dataset \
-    --exp_name $exp_name \
-    --nproc $nproc \
-    --config_files "${model_config} ${data_config} ${eval_config}" \
-    --data_preprocess
+# Préprocess (export des splits)
+$PY -u export_data_splits.py \
+  --model "$model" \
+  --dataset_name "$dataset" \
+  --output_dir "$output_dir" \
+  --config_file_list "$data_config" "$eval_config" "$model_config"

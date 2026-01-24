@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "<stdin>", line 2, in <module>
+  File "/Odyssey/private/n23chahb/compet/RecSys-Benchmark/.venv/lib/python3.10/os.py", line 680, in __getitem__
+    raise KeyError(key) from None
+KeyError: 'SRC_ITEM'

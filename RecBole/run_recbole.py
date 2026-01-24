@@ -25,7 +25,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--exp_name", type=str, default=None, help="name of experiment run"
     )
-    parser.add_argument("--config_files", type=str, default=None, help="config files")
+    # parser.add_argument("--config_files", type=str, default=None, help="config files")
+    parser.add_argument("--config_files", nargs="*", default=None, help="config files")
+
     parser.add_argument(
         "--nproc", type=int, default=1, help="the number of process in this group"
     )
@@ -47,11 +49,12 @@ if __name__ == "__main__":
 
     args, _ = parser.parse_known_args()
 
-    config_file_list = (
-        args.config_files.strip().split(" ") if args.config_files else None
-    )
+    # config_file_list = (
+    #     args.config_files.strip().split(" ") if args.config_files else None
+    # )
 
-
+    
+    config_file_list = args.config_files
     if args.data_preprocess: 
         run_recbole_dataprocess(
             args.model,
@@ -72,4 +75,5 @@ if __name__ == "__main__":
             ip=args.ip,
             port=args.port,
             group_offset=args.group_offset,
+            
         )
