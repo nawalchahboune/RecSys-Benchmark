@@ -6,9 +6,7 @@ from typing import Iterable, List, Set
 
 def iter_sequences(path: Path) -> Iterable[List[int]]:
     """
-    Format you showed:
-    session_id<TAB>comma,separated,ids
-    with a header line.
+    Iterate over sequences of item IDs from a TSV file.
     """
     with path.open("r", encoding="utf-8") as f:
         first = True
@@ -49,9 +47,8 @@ def collect_seen_ids(files: List[Path]) -> Set[int]:
 
 
 def main():
-    data_dir = Path("../data/ClueWeb-Reco/ordered_id_splits")  # ClueWeb-Reco split files live here [web:25]
+    data_dir = Path("../data/ClueWeb-Reco/ordered_id_splits")  # ClueWeb-Reco split files 
 
-    # Use whatever exists in your folder; add train_input.tsv if you have it
     candidate_files = [
         data_dir / "train_input.tsv",
         data_dir / "valid_input.tsv",

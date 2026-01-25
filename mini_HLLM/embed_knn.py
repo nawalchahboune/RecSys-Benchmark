@@ -8,7 +8,6 @@ from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
 
 
-# ---------- IO ----------
 def read_valid_ordered(input_path: Path, target_path: Path) -> tuple[list[list[int]], list[int]]:
     def parse_hist(s: str) -> list[int]:
         s = s.strip()
@@ -35,7 +34,6 @@ def read_valid_ordered(input_path: Path, target_path: Path) -> tuple[list[list[i
     return seqs, tgts
 
 
-# ---------- Embedding-based recommender ----------
 def build_id2idx(item_ids: np.ndarray) -> Dict[int, int]:
     return {int(i): idx for idx, i in enumerate(item_ids)}
 
@@ -86,7 +84,6 @@ def recommend_topk_for_seq(
     return item_ids[top_idx].astype(np.int64).tolist()
 
 
-# ---------- Metrics (Recall@K, NDCG@K) ----------
 def recall_at_k(targets: list[int], preds: list[list[int]], K: int) -> float:
     hits = 0
     n = len(targets)
@@ -139,14 +136,13 @@ def cluster_and_plot(user_embs: np.ndarray, n_clusters: int = 10, max_points: in
     N, D = user_embs.shape
     print("User emb shape:", user_embs.shape)
 
-    # Optionnel: sous-échantillonner pour t-SNE si N énorme
     idx = np.arange(N)
     if N > max_points:
         rng = np.random.default_rng(0)
         idx = rng.choice(N, size=max_points, replace=False)
     sub_embs = user_embs[idx]
 
-    # KMeans sur tous les users (ou seulement subset si tu préfères)
+    # KMeans sur tous les users 
     kmeans = KMeans(n_clusters=n_clusters, random_state=0, n_init="auto")
     labels_all = kmeans.fit_predict(user_embs)
     labels = labels_all[idx]
@@ -182,7 +178,7 @@ def main():
     id2idx = build_id2idx(item_ids)
     print("Item table:", len(item_ids), "emb dim:", item_embs.shape[1])
 
-    # 3) métriques (déjà fait)
+    # 3) métriques 
     Ks = [1, 10, 50, 100]
     preds_by_K: dict[int, list[list[int]]] = {K: [] for K in Ks}
 

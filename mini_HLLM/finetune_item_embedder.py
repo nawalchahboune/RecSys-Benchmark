@@ -55,18 +55,14 @@ def build_training_examples(
 def main():
     random.seed(0)
 
-    # 1) Load a small embedding model (fast CPU)
     model_name = "sentence-transformers/all-MiniLM-L6-v2"
     model = SentenceTransformer(model_name)
 
-    # 2) Load data using existing functions from item_encoder.py
     data_dir = Path("../data/ClueWeb-Reco/ordered_id_splits")
     
-    # Load seen items
     seen_items = load_seen_items(data_dir / "seen_item_ids.txt")
     print(f"Loaded {len(seen_items)} seen items")
     
-    # Use existing ClueWebSeqDataset to load sequences
     dataset = ClueWebSeqDataset(
         input_path=str(data_dir / "valid_input.tsv"),
         target_path=str(data_dir / "valid_target.tsv"),
@@ -75,7 +71,6 @@ def main():
     sequences_train = load_sequences_from_dataset(dataset)
     print(f"Loaded {len(sequences_train)} sequences using ClueWebSeqDataset")
     
-    # Load item text 
     item_text = load_item_text_simple(seen_items)
     print(f"Loaded text for {len(item_text)} items")
 
@@ -89,26 +84,23 @@ def main():
 
     train_loader = DataLoader(train_examples, batch_size=32, shuffle=True)
 
-    # 3) Triplet loss: bring (anchor, positive) closer than (anchor, negative)
     train_loss = losses.TripletLoss(model=model)
 
-    # Create simple evaluator to track best model (uses 500 examples for speed)
     from sentence_transformers import evaluation
     eval_examples = train_examples[:min(500, len(train_examples))]
     evaluator = evaluation.TripletEvaluator.from_input_examples(eval_examples, name='eval')
 
-    # 4) Train with automatic checkpoint saving + best model tracking
     model.fit(
         train_objectives=[(train_loader, train_loss)],
-        evaluator=evaluator,  # Évalue pour trouver le meilleur
+        evaluator=evaluator,  
         epochs=30,  
-        evaluation_steps=500,  # Évalue tous les 500 steps
+        evaluation_steps=500,  
         warmup_steps=100,
         show_progress_bar=True,
-        output_path="./checkpoints/item_embedder",  # Sauvegarde automatique ici
-        save_best_model=True,  # Garde le meilleur dans output_path
-        checkpoint_save_steps=500,  # Sauvegarde tous les 500 steps
-        checkpoint_save_total_limit=2,  # Garde seulement les 2 derniers checkpoints
+        output_path="./checkpoints/item_embedder",  
+        save_best_model=True,  
+        checkpoint_save_steps=500, 
+        checkpoint_save_total_limit=2,  
     )
     
     print(f"\n✓ MEILLEUR modèle sauvegardé dans: ./checkpoints/item_embedder")

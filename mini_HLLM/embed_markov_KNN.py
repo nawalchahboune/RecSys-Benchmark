@@ -12,7 +12,6 @@ from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
 
 
-# ---------- IO ----------
 def read_interactions(path: Path) -> Dict[str, List[int]]:
     """
     Expects TSV with header:
@@ -21,7 +20,7 @@ def read_interactions(path: Path) -> Dict[str, List[int]]:
     """
     sess = defaultdict(list)
     with path.open("r", encoding="utf-8") as f:
-        header = f.readline()
+        # header = f.readline()
         for line in f:
             parts = line.rstrip("\n").split("\t")
             if len(parts) < 3:
@@ -49,7 +48,7 @@ def read_ordered_tsv(path: Path) -> List[List[int]]:
 
     sessions: List[List[int]] = []
     with path.open("r", encoding="utf-8") as f:
-        header = f.readline()
+        # header = f.readline()
         for line in f:
             parts = line.rstrip("\n").split("\t")
             sessions.append(parse_hist(parts[1]) if len(parts) > 1 else [])
@@ -63,7 +62,7 @@ def read_targets(path: Path) -> List[int]:
     """
     t: List[int] = []
     with path.open("r", encoding="utf-8") as f:
-        header = f.readline()
+        # header = f.readline()
         for line in f:
             parts = line.rstrip("\n").split("\t")
             if len(parts) >= 2:
@@ -71,7 +70,6 @@ def read_targets(path: Path) -> List[int]:
     return t
 
 
-# ---------- Emb utils ----------
 def l2_normalize_rows(X: np.ndarray, eps: float = 1e-12) -> np.ndarray:
     n = np.linalg.norm(X, axis=1, keepdims=True)
     return X / (n + eps)
@@ -84,7 +82,6 @@ def session_emb_mean(seq: List[int], id2idx: Dict[int, int], item_embs: np.ndarr
     return item_embs[idx].mean(axis=0)
 
 
-# ---------- Continuous Markov model (Gaussian mean = Wx+b) ----------
 def fit_linear_markov(X: np.ndarray, Y: np.ndarray, lam: float = 1e-3) -> Tuple[np.ndarray, np.ndarray]:
     """
     Fit Y ≈ X W + b  (multi-output ridge regression).
@@ -121,10 +118,9 @@ def predict_next_emb(last_item_id: int, id2idx: Dict[int, int], item_embs: np.nd
     return x @ W + b  # [d]
 
 
-# ---------- Retrieval / ranking ----------
 def topk_cosine(query: np.ndarray, item_embs_norm: np.ndarray, K: int) -> np.ndarray:
     """
-    query: [d] assumed L2-normalized (or not; but consistent)
+    query: [d] assumed L2-normalized 
     item_embs_norm: [n_items, d] L2-normalized
     Returns indices of top K by dot product.
     """
@@ -167,7 +163,6 @@ def recommend_cont_markov(
     return out
 
 
-# ---------- Metrics ----------
 def recall_at_k(targets: List[int], preds: List[List[int]], K: int) -> float:
     if not targets:
         return 0.0
@@ -186,7 +181,6 @@ def ndcg_at_k(targets: List[int], preds: List[List[int]], K: int) -> float:
     return total / len(targets)
 
 
-# ---------- Plots / clustering on session embeddings ----------
 def plot_tsne_clusters(U: np.ndarray, labels: np.ndarray, out_path: str, max_points: int = 3000):
     N = U.shape[0]
     idx = np.arange(N)
@@ -229,7 +223,6 @@ def cluster_summary_csv(labels: np.ndarray, targets: List[int], preds_at_100: Li
 
 
 def main():
-    # ---- paths (edit to match your repo)
     base = Path("../data/ClueWeb-Reco")
     inter_dir = base / "interaction_splits"
     ordered_dir = base / "ordered_id_splits"
@@ -243,20 +236,17 @@ def main():
     item_ids_path = artifacts / "item_ids_30.npy"
     item_embs_path = artifacts / "item_embs_30.npy"
 
-    # ---- load embeddings
     item_ids = np.load(item_ids_path)  # [n_items]
     item_embs = np.load(item_embs_path).astype(np.float32)  # [n_items, d]
     item_embs_norm = l2_normalize_rows(item_embs)
 
     id2idx = {int(item_ids[i]): i for i in range(len(item_ids))}
 
-    # ---- train continuous Markov on transitions in embedding space
     train_sessions = read_interactions(train_path)
     X, Y = build_transition_dataset(train_sessions, id2idx, item_embs_norm)
     W, b = fit_linear_markov(X, Y, lam=1e-2)  # you can tune lam
     print("Transitions used:", X.shape[0], "dim:", X.shape[1])
 
-    # ---- eval
     seqs = read_ordered_tsv(valid_input)
     tgts = read_targets(valid_target)
 
@@ -270,11 +260,10 @@ def main():
         preds_by_K[K] = preds
         print(f"K={K:3d}  Recall@K={recall_at_k(tgts, preds, K):.4f}  NDCG@K={ndcg_at_k(tgts, preds, K):.4f}")
 
-    # ---- plots “comme avant”: cluster + t-SNE sur session embeddings U
     U = np.stack([session_emb_mean(seq, id2idx, item_embs_norm) for seq in seqs], axis=0)
     U = l2_normalize_rows(U)
 
-    kmeans = KMeans(n_clusters=10, random_state=0, n_init="auto")  # n_init='auto' is standard in sklearn now [web:416]
+    kmeans = KMeans(n_clusters=10, random_state=0, n_init="auto")  
     labels = kmeans.fit_predict(U)
 
     plot_tsne_clusters(U, labels, out_path="cont_markov_session_tsne_30.png", max_points=3000)

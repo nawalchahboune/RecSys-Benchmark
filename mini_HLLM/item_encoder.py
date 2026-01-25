@@ -24,7 +24,6 @@ class ClueWebSeqDataset(Dataset):
         self.target_path = Path(target_path) if target_path is not None else None
         self.max_seq_len = max_seq_len
 
-        # Charge tout en mémoire
         self.sequences: List[List[int]] = []
         self.targets: Optional[List[int]] = None
 
@@ -41,8 +40,8 @@ class ClueWebSeqDataset(Dataset):
                     continue
                 try:
                     # Handle two formats:
-                    # 1. TSV format: session_id \t comma-separated item IDs
-                    # 2. Space-separated format: item1 item2 item3 ...
+                    # TSV format: session_id \t comma-separated item IDs
+                    # Space-separated format: item1 item2 item3 ...
                     if '\t' in line:
                         parts = line.split('\t')
                         if len(parts) >= 2:
@@ -66,8 +65,8 @@ class ClueWebSeqDataset(Dataset):
                     continue
                 try:
                     # Handle two formats:
-                    # 1. TSV format: session_id \t target_id
-                    # 2. Single value per line: target_id
+                    # TSV format: session_id \t target_id
+                    # Single value per line: target_id
                     if '\t' in line:
                         parts = line.split('\t')
                         if len(parts) >= 2:

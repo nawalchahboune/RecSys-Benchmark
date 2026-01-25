@@ -3,7 +3,7 @@ from pathlib import Path
 import csv
 import numpy as np
 
-from helpers import load_seen_items  # must return List[int] or Set[int]
+from helpers import load_seen_items  
 
 
 def load_item_texts_from_cwid_to_id(cwid_to_id_path: Path, seen_items: set[int]) -> dict[int, str]:
@@ -24,8 +24,8 @@ def load_item_texts_from_cwid_to_id(cwid_to_id_path: Path, seen_items: set[int])
                 continue
             
             try:
-                cwid = parts[0]  # e.g., "clueweb22-en0014-00-00001"
-                item_id = int(parts[1])  # internal ID
+                cwid = parts[0] 
+                item_id = int(parts[1])  
             except (ValueError, IndexError):
                 continue
 
@@ -43,24 +43,18 @@ def main():
 
     data_dir = Path("../data/ClueWeb-Reco/ordered_id_splits")
 
-    # 1) seen items
     seen_items = set(load_seen_items(data_dir / "seen_item_ids.txt"))
     print(f"Loaded {len(seen_items)} seen items")
 
-    # 2) load texts for those items
     cwid_to_id_path = Path("../data/ClueWeb-Reco/cwid_to_id.tsv")
     item_text = load_item_texts_from_cwid_to_id(cwid_to_id_path, seen_items)
     print(f"Loaded text for {len(item_text)} items")
 
-    # 3) align ids + texts
     item_ids = sorted(item_text.keys())
     texts = [item_text[i] for i in item_ids]
 
-    # 4) memory/time controls
-    # limit max tokens processed by the model (long texts are truncated anyway) 
     model.max_seq_length = min(getattr(model, "max_seq_length", 256), 128)
 
-    # 5) encode in batches; normalize for cosine-as-dot-product 
     embs = model.encode(
         texts,
         batch_size=128,
@@ -69,7 +63,6 @@ def main():
         normalize_embeddings=True,
     )
 
-    # 6) save: keep item_ids + embedding matrix
     out_dir = Path("artifacts")
     out_dir.mkdir(parents=True, exist_ok=True)
 

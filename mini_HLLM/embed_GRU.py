@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from collections import Counter, defaultdict
-from urllib.parse import urlparse
+from collections import defaultdict
 import csv
 
 from helpers import load_item_text_simple
@@ -15,17 +14,15 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-from helpers import save_orbit_bin
 
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
 
-# ---------- IO (ordered_id_splits) ----------
 def read_ordered_tsv(path: Path) -> List[List[int]]:
     seqs: List[List[int]] = []
     with path.open("r", encoding="utf-8") as f:
-        header = f.readline()
+        # header = f.readline()
         for line in f:
             parts = line.rstrip("\n").split("\t")
             if len(parts) < 2:
@@ -45,7 +42,7 @@ def read_ordered_tsv(path: Path) -> List[List[int]]:
 def read_valid_targets(path: Path) -> List[int]:
     tgts: List[int] = []
     with path.open("r", encoding="utf-8") as f:
-        header = f.readline()
+        # header = f.readline()
         for line in f:
             parts = line.rstrip("\n").split("\t")
             if len(parts) < 2:
@@ -54,7 +51,6 @@ def read_valid_targets(path: Path) -> List[int]:
     return tgts
 
 
-# ---------- Submission writer ----------
 def write_bin(out_path: str, all_preds: List[List[int]], K: int) -> None:
     n = len(all_preds)
     with open(out_path, "wb") as f:
@@ -67,7 +63,6 @@ def write_bin(out_path: str, all_preds: List[List[int]], K: int) -> None:
                 f.write(struct.pack("<i", int(x)))
 
 
-# ---------- Dataset: (prefix -> next) pairs ----------
 class NextItemDataset(Dataset):
     def __init__(
         self,
@@ -130,7 +125,6 @@ def collate_prefix_batch(batch: List[Tuple[List[int], int]], id2idx: Dict[int, i
     return x_idx, lengths, y_idx
 
 
-# ---------- Model: GRU user encoder ----------
 class UserGRU(nn.Module):
     def __init__(self, emb_dim: int, hidden_dim: int = 256):
         super().__init__()
@@ -153,7 +147,6 @@ class UserGRU(nn.Module):
         return z
 
 
-# ---------- InfoNCE (in-batch negatives) ----------
 def info_nce_inbatch(query: torch.Tensor, pos: torch.Tensor, temperature: float = 0.07) -> torch.Tensor:
     """
     query: [B, D] predicted embedding
@@ -167,7 +160,6 @@ def info_nce_inbatch(query: torch.Tensor, pos: torch.Tensor, temperature: float 
     return nn.functional.cross_entropy(logits, labels)
 
 
-# ---------- Evaluation (Recall@K, NDCG@K for one target) ----------
 def recall_ndcg_at_k(targets: List[int], preds: List[List[int]], K: int) -> Tuple[float, float]:
     hits = 0
     ndcg = 0.0
@@ -308,7 +300,7 @@ def export_cluster_cwids(
     print("Saved:", out_csv)
 
 def main():
-    device = "cpu"  # or "mps" if you want Apple GPU
+    device = "cpu"  # or "mps" if for Apple GPU
     base = Path("../data/ClueWeb-Reco/ordered_id_splits")
     artifacts = Path("artifacts")
 
@@ -326,7 +318,7 @@ def main():
     # -------- data --------
     train_path = base / "train_input.tsv"
     if not train_path.exists():
-        # fallback (not ideal, but works to debug)
+        # fallback 
         train_path = base / "valid_input.tsv"
 
     train_seqs = read_ordered_tsv(train_path)
@@ -342,11 +334,9 @@ def main():
 
     train_loader = DataLoader(train_ds, batch_size=256, shuffle=True, collate_fn=collate_fn)
 
-    # -------- model --------
     model = UserGRU(emb_dim=D, hidden_dim=256).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=2e-3)
 
-    # -------- training (1-3 epochs CPU friendly) --------
     model.train()
     for epoch in range(1, 3):
         total = 0.0
@@ -369,7 +359,6 @@ def main():
 
         print(f"epoch={epoch}  avg_loss={total/len(train_loader):.4f}")
 
-    # -------- inference on valid: retrieval on frozen item_embs --------
     model.eval()
     Ks = [1, 10, 50, 100]
     preds_by_K = {K: [] for K in Ks}
@@ -411,7 +400,6 @@ def main():
     # save_orbit_bin(preds_by_K[100], 100, "submissions/gru_valid_K100.bin")
     # save_orbit_bin(preds_by_K[10], 10, "submissions/gru_valid_K10.bin")
 
-        # ----- Clustering / plots sur les embeddings de session GRU -----
     U = compute_gru_session_embeddings(
         model=model,
         valid_seqs=valid_seqs,
