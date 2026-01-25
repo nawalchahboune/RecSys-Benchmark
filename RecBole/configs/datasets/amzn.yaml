@@ -2,21 +2,19 @@
 seed: 42
 shuffle: True
 reproducibility: True
-# NOTE: reproducibility can set to False to accelerate for CNN models like 
-# Caser. It has no significant effect on the performance of the model, but 
-# sacrifices the reproducibility of the results. We set it to False in the 
-# following experiment: 
-# - Caser_amzn-books
-# - Caser_amzn-toys
-# - Caser_amzn-beauty
-# - Caser_amzn-sports
+
+# NOTE: reproducibility can be set to False to accelerate CNN models like Caser.
+# It has no significant effect on performance but sacrifices result reproducibility.
+# Set to False for: Caser_amzn-books, Caser_amzn-toys, Caser_amzn-beauty, Caser_amzn-sports
 
 # dataset info
 dataset: 
-#data_path: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_beauty
-#data_path: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_sports
-data_path: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_books
-#data_path: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_toys
+  data_path: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_books
+  # Alternative datasets (uncomment to use):
+  # data_path: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_beauty
+  # data_path: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_sports
+  # data_path: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_toys
+
 load_col:
     inter: [user_id, item_id, rating, timestamp]
     item: ['item_id','categories','average_rating','rating_number','title']
@@ -31,5 +29,3 @@ val_interval: ~
 filter_inter_by_user_or_item: True
 user_inter_num_interval: "[5,inf)"
 item_inter_num_interval: "[5,inf)"
-
-
