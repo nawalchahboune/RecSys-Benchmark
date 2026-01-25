@@ -1,0 +1,12 @@
+Using Python: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/.venv/bin/python
+-rw-r--r-- 1 n23chahb RUC-eleve 91781980 janv. 25 14:39 /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_toys/amzn/amzn.inter
+-rw-r--r-- 1 n23chahb RUC-eleve 52739340 janv. 25 14:39 /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_toys/amzn/amzn.item
+CUDA available: True
+GPU count: 1
+torch version: 2.5.1+cu121
+CUDA build: 12.1
+============================================================
+MODEL SASRecF lancé avec config s7i7a:
+  n_layers=4, n_heads=4, hidden_size=256, inner_size=1024
+  selected_features=['categories'], pooling_mode=mean, loss_type=CE
+============================================================
