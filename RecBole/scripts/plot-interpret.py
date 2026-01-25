@@ -95,24 +95,24 @@ class SASRecFLogParser:
     def print_summary(self):
         """Affiche un résumé des métriques"""
         print("\n" + "="*70)
-        print("📊 RÉSUMÉ DE L'ENTRAÎNEMENT")
+        print(" RÉSUMÉ DE L'ENTRAÎNEMENT")
         print("="*70)
         
         if 'epoch' in self.metrics and len(self.metrics['epoch']) > 0:
             n_epochs = max(self.metrics['epoch']) + 1
-            print(f"\n✅ Epochs complétés: {n_epochs}")
+            print(f"\n Epochs complétés: {n_epochs}")
             
             # Train Loss
             if 'train_loss' in self.metrics:
                 losses = self.metrics['train_loss']
-                print(f"\n📉 Train Loss:")
+                print(f"\n Train Loss:")
                 print(f"   Epoch 0:     {losses[0]:.4f}")
                 if len(losses) > 1:
                     print(f"   Epoch {len(losses)-1}:     {losses[-1]:.4f}")
                     print(f"   Amélioration: {losses[0] - losses[-1]:.4f} ({100*(losses[0]-losses[-1])/losses[0]:.1f}%)")
             
             # Validation Metrics
-            print(f"\n🎯 Métriques de Validation (dernier epoch):")
+            print(f"\n Métriques de Validation (dernier epoch):")
             key_metrics = ['recall@10', 'ndcg@10', 'mrr@10', 'hit@10']
             for metric in key_metrics:
                 if metric in self.metrics and len(self.metrics[metric]) > 0:
@@ -130,23 +130,23 @@ class SASRecFLogParser:
                         std = stats['std'][-1] if 'std' in stats else 0
                         
                         # Diagnostic
-                        status = "✅"
+                        status = "success"
                         warning = ""
                         
                         if 'emb' in tensor:  # embeddings
                             if std < 0.02:
-                                status = "❌"
+                                status = "error"
                                 warning = "TROP BAS !"
                             elif std < 0.1:
-                                status = "⚠️"
+                                status = "attention"
                                 warning = "faible"
                         
                         elif tensor.startswith('g'):  # gates
                             if std < 0.01:
-                                status = "❌"
+                                status = "error"
                                 warning = "pas de variabilité"
                             elif std < 0.05:
-                                status = "⚠️"
+                                status = "attention"
                                 warning = "faible sélectivité"
                         
                         print(f"   {tensor:10s}: mean={mean:7.4f}, std={std:7.4f} {status} {warning}")
@@ -165,7 +165,7 @@ class SASRecFLogParser:
             axes[0].plot(epochs, self.metrics['train_loss'], 'b-o', label='Train Loss', linewidth=2)
             axes[0].set_xlabel('Epoch', fontsize=12)
             axes[0].set_ylabel('Loss', fontsize=12)
-            axes[0].set_title('📉 Training Loss', fontsize=14, fontweight='bold')
+            axes[0].set_title(' Training Loss', fontsize=14, fontweight='bold')
             axes[0].grid(True, alpha=0.3)
             axes[0].legend()
             
@@ -190,7 +190,7 @@ class SASRecFLogParser:
         
         axes[1].set_xlabel('Epoch', fontsize=12)
         axes[1].set_ylabel('Score', fontsize=12)
-        axes[1].set_title('🎯 Validation Metrics', fontsize=14, fontweight='bold')
+        axes[1].set_title(' Validation Metrics', fontsize=14, fontweight='bold')
         axes[1].grid(True, alpha=0.3)
         axes[1].legend()
         axes[1].set_ylim(bottom=0)
@@ -209,14 +209,14 @@ class SASRecFLogParser:
         axes[2].axhline(y=0.5, color='gray', linestyle='--', alpha=0.5, label='Neutral (0.5)')
         axes[2].set_xlabel('Iteration (logs)', fontsize=12)
         axes[2].set_ylabel('Gate Value', fontsize=12)
-        axes[2].set_title('🚪 Gates Evolution', fontsize=14, fontweight='bold')
+        axes[2].set_title(' Gates Evolution', fontsize=14, fontweight='bold')
         axes[2].grid(True, alpha=0.3)
         axes[2].legend()
         axes[2].set_ylim([0.3, 0.7])
         
         plt.tight_layout()
         plt.savefig(save_path, dpi=150, bbox_inches='tight')
-        print(f"\n📊 Visualisations sauvegardées: {save_path}")
+        print(f"\n Visualisations sauvegardées: {save_path}")
         plt.show()
     
     def plot_embeddings_health(self, save_path='embeddings_health.png'):
@@ -236,7 +236,7 @@ class SASRecFLogParser:
         
         axes[0].set_xlabel('Iteration', fontsize=12)
         axes[0].set_ylabel('Std Dev', fontsize=12)
-        axes[0].set_title('📊 Embeddings Standard Deviation', fontsize=14, fontweight='bold')
+        axes[0].set_title(' Embeddings Standard Deviation', fontsize=14, fontweight='bold')
         axes[0].legend()
         axes[0].grid(True, alpha=0.3)
         axes[0].set_ylim(bottom=0)
@@ -256,13 +256,13 @@ class SASRecFLogParser:
         
         axes[1].set_xlabel('Iteration', fontsize=12)
         axes[1].set_ylabel('Loss', fontsize=12)
-        axes[1].set_title('📉 Batch Loss Evolution', fontsize=14, fontweight='bold')
+        axes[1].set_title(' Batch Loss Evolution', fontsize=14, fontweight='bold')
         axes[1].legend()
         axes[1].grid(True, alpha=0.3)
         
         plt.tight_layout()
         plt.savefig(save_path, dpi=150, bbox_inches='tight')
-        print(f"📊 Health check sauvegardé: {save_path}")
+        print(f" Health check sauvegardé: {save_path}")
         plt.show()
     
     def export_to_csv(self, output_file='training_metrics.csv'):
@@ -288,12 +288,8 @@ class SASRecFLogParser:
                         row[key] = None
                 writer.writerow(row)
         
-        print(f"📄 Métriques exportées: {output_file}")
+        print(f" Métriques exportées: {output_file}")
 
-
-# ============================================================
-# EXEMPLE D'UTILISATION
-# ============================================================
 
 if __name__ == "__main__":
     import sys
@@ -316,19 +312,10 @@ if __name__ == "__main__":
     for pattern in log_patterns:
         log_files.extend(glob.glob(pattern))
     
-    # # Si argument fourni, l'utiliser
-    # if len(sys.argv) > 1:
-    #     LOG_FILE = sys.argv[1]
-    # elif log_files:
-    #     # Prendre le plus récent
-    #     LOG_FILE = max(log_files, key=lambda f: os.path.getmtime(f) if os.path.exists(f) else 0)
-    #     print(f"📁 Fichier détecté automatiquement: {LOG_FILE}")
-    # else:
-    #     LOG_FILE = None
-    LOG_FILE = "outputs_train_before_20/sasrecf_ml1m_train-27753.err"
+    LOG_FILE = "outputs_sasrecf_on_ml-1m/sasrecf_ml1m_train-27753.err"
     if LOG_FILE and os.path.exists(LOG_FILE):
         try:
-            print(f"\n🔍 Parsing {LOG_FILE}...")
+            print(f"\n Parsing {LOG_FILE}...")
             parser.parse_log_file(LOG_FILE)
             parser.print_summary()
             
@@ -338,18 +325,18 @@ if __name__ == "__main__":
             parser.plot_embeddings_health(f'{base_name}_health.png')
             parser.export_to_csv(f'{base_name}_metrics.csv')
             
-            print("\n✅ Analyse terminée !")
+            print("\n Analyse terminée !")
             
         except Exception as e:
-            print(f"❌ Erreur lors du parsing: {e}")
+            print(f" Erreur lors du parsing: {e}")
             import traceback
             traceback.print_exc()
     else:
-        print(f"⚠️ Aucun fichier de logs trouvé.")
-        print("\n💡 Utilisation:")
+        print(f" Aucun fichier de logs trouvé.")
+        print("\n Utilisation:")
         print("  python log_parser.py                          # Auto-détecte les fichiers")
         print("  python log_parser.py sasrecf_ml1m_train-28019.err  # Spécifie un fichier")
-        print("\n📝 Formats supportés: .err, .log")
+        print("\n Formats supportés: .err, .log")
         
         # Option 2: Parser du contenu directement (exemple)
         print("\n" + "="*70)
