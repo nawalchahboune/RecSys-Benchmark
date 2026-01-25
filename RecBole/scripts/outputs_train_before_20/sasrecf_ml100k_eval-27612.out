@@ -1,5 +1,0 @@
-Using Python: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/.venv/bin/python
--rw-r--r-- 1 n23chahb RUC-eleve 1979230 janv. 16 00:47 /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-ml/ml-100k/ml-100k.inter
--rw-r--r-- 1 n23chahb RUC-eleve   66632 janv. 16 00:47 /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-ml/ml-100k/ml-100k.item
--rw-r--r-- 1 n23chahb RUC-eleve   22697 janv. 16 00:47 /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-ml/ml-100k/ml-100k.user
-Submission path: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/submissions/SASRecF_ml-100k-20260116-154113.bin

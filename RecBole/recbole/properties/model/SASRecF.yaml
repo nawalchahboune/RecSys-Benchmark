@@ -1,4 +1,4 @@
-# pour le vrai SASRecF
+# pour le SASRecF SOTA
 
 # n_layers: 2                     # (int) The number of transformer layers in transformer encoder.
 # n_heads: 2                      # (int) The number of attention heads for multi-head attention layer.
@@ -15,7 +15,7 @@
 
 
 
-# pour HLLMRecF
+# pour Notre version
 
 n_layers: 4
 n_heads: 4

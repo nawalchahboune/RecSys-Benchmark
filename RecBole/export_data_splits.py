@@ -118,42 +118,7 @@ def export_amazon_item_file(dataset, output_file):
 
 
 
-# def export_mind_item_file(dataset, output_file):
-#     """Export Mind-style item file with mapped token fields and raw float fields."""
-#     item_feat = dataset.item_feat.numpy()
 
-#     # Extract fields
-#     item_id = item_feat['item_id']
-#     title_id = item_feat['title']
-#     category_id = item_feat['categories']
-#     abstract_id = item_feat['abstract']
-
-#     # Token mappings
-#     title_map = dataset.field2id_token['title']
-#     category_map = dataset.field2id_token['categories']
-#     abstract_map = dataset.field2id_token['abstract']
-
-#     # Open file and write header
-#     with open(output_file, 'w', encoding='utf-8') as writer:
-#         writer.write('item_id:token\ttitle:token\tcategories:token\taverage_rating:float\trating_number:float\tprice:float\n')
-
-#         for i in range(len(item_id)):
-#             iid = int(item_id[i])  # transformed item_id
-#             tid = int(title_id[i])
-#             cid = int(category_id[i])
-#             aid = int(abstract_id[i])
-
-#             title_str = title_map[tid] if tid < len(title_map) else '[UNK]'
-#             category_str = category_map[cid] if cid < len(category_map) else '[UNK]'
-#             abstract_str = abstract_map[aid] if aid < len(abstract_map) else '[UNK]'
-
-#             writer.write(f"{iid}\t{title_str}\t{category_str}\t{abstract_str}\n")
-
-#     print(f"Finished writing: {output_file}")
-
-
-
-# ...existing code...
 def export_mind_item_file(dataset, output_file):
     """Export Mind-style item file."""
     item_np = dataset.item_feat.numpy()
@@ -173,111 +138,8 @@ def export_mind_item_file(dataset, output_file):
             tid = int(title_id[i]); cid = int(category_id[i]); aid = int(abstract_id[i])
             writer.write(f"{iid}\t{title_map[tid]}\t{category_map[cid]}\t{abstract_map[aid]}\n")
     print(f"Finished writing: {output_file}")
-# ...existing code...
-
-def export_ml_item_file__(dataset, output_file):
-    """Export ML-1M item file in raw format with proper genre formatting."""
-    item_feat = dataset.item_feat.numpy()
-
-    # Extract each field
-    item_id = item_feat['item_id']
-    title_id = item_feat['movie_title']
-    year_id = item_feat['release_year']
-    genre_id_list = item_feat['genre']
-
-    # Token mappings
-    title_map = dataset.field2id_token['movie_title']
-    year_map = dataset.field2id_token['release_year']
-    genre_map = dataset.field2id_token['genre']
-
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write("item_id:token\tmovie_title:token\trelease_year:token\tgenre:token_seq\n")
-
-        for i in range(len(item_id)):
-            iid = int(item_id[i])
-            tid = int(title_id[i])
-            yid = int(year_id[i])
-            gid_list = genre_id_list[i]
-
-            title_str = title_map[tid] if tid < len(title_map) else '[UNK]'
-            year_str = year_map[yid] if yid < len(year_map) else '[UNK]'
-            genre_tokens = [genre_map[gid] for gid in gid_list if gid < len(genre_map) and genre_map[gid] != '[PAD]']
-            genre_str = ' '.join(genre_tokens)
-
-            f.write(f"{iid}\t{title_str}\t{year_str}\t{genre_str}\n")
-
-    print(f"Finished writing: {output_file}")
 
 
-# def export_user_file(dataset, output_file):
-#     """Export user data to a tab-separated file with proper token mapping"""
-#     if dataset.user_feat is None or len(dataset.user_feat) == 0:
-#         print("No user features to export.")
-#         return
-
-#     with open(output_file, 'w', encoding='utf-8') as f:
-#         user_fields = [field for field in dataset.field2type.keys() 
-#                       if field in dataset.user_feat]
-        
-#         header = [f"{field}:{dataset.field2type[field]}" for field in user_fields]
-#         f.write('\t'.join(header) + '\n')
-        
-#         user_feat_numpy = dict(dataset.user_feat.numpy())
-        
-#         token_mappings = {}
-#         for field in user_fields:
-#             if field in dataset.field2id_token:
-#                 token_mappings[field] = dataset.field2id_token[field]
-        
-#         for i in tqdm(range(len(dataset.user_feat)), desc="Writing user file"):
-#             row = []
-#             for field in user_fields:
-#                 if field in user_feat_numpy:
-#                     value = user_feat_numpy[field][i]
-                    
-#                     if field in token_mappings and isinstance(value, (int, np.integer)):
-#                         token_id = int(value)
-#                         if token_id < len(token_mappings[field]):
-#                             value = token_mappings[field][token_id]
-                    
-#                     row.append(str(value))
-#                 else:
-#                     row.append("")
-                    
-#             f.write('\t'.join(row) + '\n')
-#     print(f"Saved: {output_file}")
-
-# ...existing code...
-def export_user_file__(dataset, output_file):
-    """Export user data en TSV avec mapping token."""
-    if dataset.user_feat is None or len(dataset.user_feat) == 0:
-        print("No user features to export.")
-        return
-
-    user_cols = dataset.user_feat.get_col_names()
-    with open(output_file, 'w', encoding='utf-8') as f:
-        header = [f"{c}:{dataset.field2type.get(c, 'token')}" for c in user_cols]
-        f.write('\t'.join(header) + '\n')
-
-        user_np = dict(dataset.user_feat.numpy())
-        token_maps = {c: dataset.field2id_token[c] for c in user_cols if c in dataset.field2id_token}
-
-        for i in tqdm(range(len(dataset.user_feat)), desc="Writing user file"):
-            row = []
-            for c in user_cols:
-                v = user_np.get(c)
-                if v is None:
-                    row.append("")
-                    continue
-                val = v[i]
-                if c in token_maps and isinstance(val, (int, np.integer)):
-                    tid = int(val)
-                    if tid < len(token_maps[c]):
-                        val = token_maps[c][tid]
-                row.append(str(val))
-            f.write('\t'.join(row) + '\n')
-    print(f"Saved: {output_file}")
-# ...existing code...
 
 def export_dataset_raw_format(model, dataset_name, output_dir, config_file_list=None, config_dict=None):
     """Export dataset in raw RecBole format"""
@@ -337,63 +199,7 @@ def export_dataset_raw_format(model, dataset_name, output_dir, config_file_list=
     
     print("All files exported.")
     
-def export_ml_item_file_(dataset, output_file):
-    """Export ML item file (100k/1m) avec détection des champs."""
-    item_feat = dataset.item_feat
-    col_names = set(item_feat.get_col_names())
 
-    title_key = 'movie_title' if 'movie_title' in col_names else ('title' if 'title' in col_names else None)
-    year_key = 'release_year' if 'release_year' in col_names else ('year' if 'year' in col_names else None)
-    genre_key = 'genre' if 'genre' in col_names else ('genres' if 'genres' in col_names else None)
-
-    if title_key is None or genre_key is None:
-        raise KeyError(f"Champs manquants dans item_feat: title={title_key}, genre={genre_key}")
-
-    item_np = item_feat.numpy()
-    item_id = item_np['item_id']
-    title_id = item_np[title_key]
-    year_id = item_np[year_key] if year_key else None
-    genre_id_list = item_np[genre_key]
-
-    title_map = dataset.field2id_token.get(title_key, [])
-    year_map = dataset.field2id_token.get(year_key, []) if year_key else []
-    genre_map = dataset.field2id_token.get(genre_key, [])
-
-    with open(output_file, 'w', encoding='utf-8') as f:
-        header = ["item_id:token", f"{title_key}:token"]
-        if year_key:
-            header.append(f"{year_key}:token")
-        header.append(f"{genre_key}:token_seq")
-        f.write("\t".join(header) + "\n")
-
-        for i in range(len(item_id)):
-            iid = int(item_id[i])
-            tid = int(title_id[i])
-            title_str = title_map[tid] if tid < len(title_map) else '[UNK]'
-
-            if year_key:
-                yid = int(year_id[i])
-                year_str = year_map[yid] if yid < len(year_map) else '[UNK]'
-            else:
-                year_str = None
-
-            gids = genre_id_list[i]
-            # token_seq peut être une liste ou une chaîne; normaliser en liste d’ids
-            if not isinstance(gids, (list, tuple)):
-                gids = [gids]
-            genre_tokens = [genre_map[g] for g in gids if isinstance(g, (int, np.integer)) and g < len(genre_map) and genre_map[g] != '[PAD]']
-            genre_str = ' '.join(genre_tokens)
-
-            row = [str(iid), title_str]
-            if year_key:
-                row.append(year_str)
-            row.append(genre_str)
-            f.write("\t".join(row) + "\n")
-    print(f"Finished writing: {output_file}")
-
-
-# Dans export_dataset_raw_format(...), conserve l’override CE et la sanitisation de sys.argv
-# ...existing code...
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

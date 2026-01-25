@@ -38,12 +38,10 @@ from recbole.utils import (
 )
 
 
-# ...existing code...
 import os, struct
 import numpy as np
 import torch
 from logging import getLogger
-# ...existing code...
 
 def evaluate_and_export(trainer, test_data, config, saved, eval_only, train_data, model):
     test_result = trainer.evaluate(

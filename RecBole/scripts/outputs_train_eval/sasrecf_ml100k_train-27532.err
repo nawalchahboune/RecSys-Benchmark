@@ -1,4 +1,0 @@
-srun: error: CPU binding outside of job step allocation, allocated CPUs are: 0x00001F00073000001F000730.
-srun: error: Task launch for StepId=27532.0 failed on node sl-mee-br-208: Unable to satisfy cpu bind request
-srun: error: Application launch failed: Unable to satisfy cpu bind request
-srun: Job step aborted

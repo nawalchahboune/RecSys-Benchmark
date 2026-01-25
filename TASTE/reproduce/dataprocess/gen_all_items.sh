@@ -11,7 +11,6 @@
 #SBATCH --error=/Odyssey/private/n23chahb/compet/RecSys-Benchmark/TASTE/reproduce/dataprocess/outputs/%x-%j.err
 
 #!/bin/bash
-# ...existing code...
 set -euo pipefail
 mkdir -p /Odyssey/private/n23chahb/compet/RecSys-Benchmark/TASTE/reproduce/dataprocess/outputs
 
@@ -51,4 +50,3 @@ $PY "$SCRIPT" \
   --output "item_name.jsonl" \
   --output_dir "$DATA_DIR" \
   --tokenizer "$TOKENIZER"
-# ...existing code...

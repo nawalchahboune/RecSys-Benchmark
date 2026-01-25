@@ -1,26 +1,0 @@
-/Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/recbole/data/dataset/dataset.py:513: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.
-The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.
-
-For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
-
-
-  df[field].fillna(value="", inplace=True)
-/Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/recbole/data/dataset/dataset.py:1229: FutureWarning: using <built-in function len> in Series.agg cannot aggregate and has been deprecated. Use Series.transform to keep behavior unchanged.
-  split_point = np.cumsum(feat[field].agg(len))[:-1]
-/Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/recbole/data/dataset/dataset.py:660: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.
-The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.
-
-For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
-
-
-  feat[field].fillna(value=0, inplace=True)
-/Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/recbole/data/dataset/dataset.py:662: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.
-The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.
-
-For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
-
-
-  feat[field].fillna(value=feat[field].mean(), inplace=True)
-Writing train.inter:   0%|          | 0/91692 [00:00<?, ?it/s]Writing train.inter:  26%|██▋       | 24193/91692 [00:00<00:00, 241903.70it/s]Writing train.inter:  56%|█████▌    | 51283/91692 [00:00<00:00, 258951.01it/s]Writing train.inter:  85%|████████▌ | 78329/91692 [00:00<00:00, 264202.12it/s]Writing train.inter: 100%|██████████| 91692/91692 [00:00<00:00, 262553.11it/s]
-Writing valid.inter:   0%|          | 0/917 [00:00<?, ?it/s]Writing valid.inter: 100%|██████████| 917/917 [00:00<00:00, 89625.22it/s]
-Writing test.inter:   0%|          | 0/917 [00:00<?, ?it/s]Writing test.inter: 100%|██████████| 917/917 [00:00<00:00, 107438.11it/s]

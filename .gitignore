@@ -7,8 +7,8 @@ log_tensorboard
 checkpoints
 ClueWeb-Reco/demo/auth/api_keys.json
 .venv
-data-amzn
+data-amzn_beauty
+data-amzn_books
+data-amzn_sports
+data-amzn_toys
 data-ml
-Amazon_Beauty
-RecBole/clueWebAdapt
-RecBole/tosbmit

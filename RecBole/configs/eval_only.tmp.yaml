@@ -1,8 +1,0 @@
-eval_only: True
-resume_path: "/Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/saved/SASRecF_ml-100k/SASRecF-Jan-16-2026_03-38-45.pth"
-show_progress: False
-use_gpu: False
-enable_amp: False
-enable_scaler: False
-save_submission_path: "/Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/submissions/SASRecF_ml-100k-20260116-154113.bin"
-topk: [10]

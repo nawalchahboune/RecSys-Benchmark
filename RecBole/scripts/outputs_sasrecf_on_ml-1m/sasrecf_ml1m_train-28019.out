@@ -1,0 +1,13 @@
+Using Python: /Odyssey/private/n23chahb/compet/RecSys-Benchmark/.venv/bin/python
+lrwxrwxrwx 1 n23chahb RUC-eleve 81 janv. 16 21:21 /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-ml/ml-1m/ml-1m.inter -> /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-ml/ml-1m/ml-1m/ml-1m.inter
+lrwxrwxrwx 1 n23chahb RUC-eleve 80 janv. 16 21:21 /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-ml/ml-1m/ml-1m.item -> /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-ml/ml-1m/ml-1m/ml-1m.item
+lrwxrwxrwx 1 n23chahb RUC-eleve 80 janv. 16 21:21 /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-ml/ml-1m/ml-1m.user -> /Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-ml/ml-1m/ml-1m/ml-1m.user
+CUDA available: True
+GPU count: 1
+torch version: 2.5.1+cu121
+CUDA build: 12.1
+============================================================
+MODEL SASRecF lancé avec config:
+  n_layers=4, n_heads=4, hidden_size=256, inner_size=1024
+  selected_features=['genre'], pooling_mode=mean, loss_type=CE
+============================================================

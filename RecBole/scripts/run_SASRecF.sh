@@ -1,17 +1,13 @@
 #!/bin/bash
-#SBATCH --job-name=sasrecf_amzn_train
+#SBATCH --job-name=sasrecf_amzn-books_train
 #SBATCH --partition=Odyssey
-#SBATCH --gres=gpu:1        # ou gpu:1 pour “n’importe quel GPU”; autres choix: gpu:h100:1, gpu:l40s:1, gpu:rtx8000:1
-#SBATCH --nodes=1
+#SBATCH --gres=gpu:1        
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=128G
 #SBATCH --time=10:00:00
 #SBATCH --output=/Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/scripts/outputs/%x-%j.out
 #SBATCH --error=/Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/scripts/outputs/%x-%j.err
-
-
-
 
 set -euo pipefail
 mkdir -p /Odyssey/private/n23chahb/compet/RecSys-Benchmark/RecBole/scripts/outputs
@@ -30,11 +26,15 @@ data_config="${source_dir}/configs/datasets/amzn.yaml"
 eval_config="${source_dir}/configs/eval.yaml"
 exp_name="SASRecF_${dataset}"
 
-DATA_ROOT="/Odyssey/private/n23chahb/compet/RecSys-Benchmark/Amazon_Beauty"
+#DATA_ROOT="/Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_sports"
+#DATA_ROOT="/Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_beauty"
+DATA_ROOT="/Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_books"
+#DATA_ROOT="/Odyssey/private/n23chahb/compet/RecSys-Benchmark/data-amzn_toys"
+
+# Verify data files exist
 ls -l "$DATA_ROOT/${dataset}/"{${dataset}.inter,${dataset}.item}
 
-
-# ...existing code...
+# Stop if CUDA not available in this venv
 $PY - <<'PY'
 import sys, torch
 print('CUDA available:', torch.cuda.is_available())
@@ -44,13 +44,12 @@ print('CUDA build:', getattr(torch.version, 'cuda', None))
 sys.exit(0 if torch.cuda.is_available() else 1)
 PY
 
-# Stop if CUDA not available in this venv
 if [[ $? -ne 0 ]]; then
   echo "CUDA not available in this Python env. Install GPU wheels for PyTorch."
   exit 1
 fi
-# ...existing code...
 
+# Run training
 cd "$source_dir"
 $PY run_recbole.py \
   --model "$model" \
