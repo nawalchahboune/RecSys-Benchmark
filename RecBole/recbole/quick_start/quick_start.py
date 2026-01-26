@@ -43,73 +43,6 @@ import numpy as np
 import torch
 from logging import getLogger
 
-def evaluate_and_export(trainer, test_data, config, saved, eval_only, train_data, model):
-    test_result = trainer.evaluate(
-        test_data,
-        load_best_model=(saved and not eval_only),
-        show_progress=config["show_progress"],
-    )
-    logger = getLogger()
-    # logger.info(set_color("test result", "yellow") + f": {test_result}")
-
-    save_path = config["save_submission_path"] if "save_submission_path" in config else os.environ.get("SAVE_SUBMISSION_PATH")
-    if not save_path:
-        return test_result
-
-    K = int(os.environ.get("SUBMISSION_K", 0)) or int(config["topk"][0] if ("topk" in config and config["topk"]) else 10)
-
-    # Top-K par session, avec dépaquetage du batch -> interaction
-    preds = []
-    model.eval()
-    with torch.no_grad():
-        for batch in test_data:
-            interaction = batch[0] if isinstance(batch, (tuple, list)) else batch
-            scores = (
-                model.full_sort_predict(interaction)
-                if hasattr(model, "full_sort_predict")
-                else model.predict(interaction)
-            )
-            if isinstance(scores, (tuple, list)):
-                scores = scores[0]
-            topk_idx = torch.topk(scores, K, dim=1).indices.cpu().numpy()
-            preds.append(topk_idx)
-
-    topk_matrix = np.vstack(preds) if preds else np.empty((0, K), dtype=np.int64)
-    num_sessions = int(topk_matrix.shape[0])
-
-    ds = train_data._dataset
-    # id2tok = ds.id2token("item_id")
-    mapping_path = config["clueweb_mapping_path"] if "clueweb_mapping_path" in config else os.environ.get("CLUEWEB_MAPPING_PATH")
-    # Convert RecBole item ids -> tokens for mapping
-    rid_flat = topk_matrix.ravel()
-    tokens_flat = np.array(ds.id2token("item_id", rid_flat))
-    tokens = tokens_flat.reshape(topk_matrix.shape)
-    if mapping_path and os.path.isfile(mapping_path):
-        token_to_internal = {}
-        with open(mapping_path, "r", encoding="utf-8") as f:
-            for line in f:
-                parts = line.rstrip("\n").split("\t")
-                if len(parts) >= 2:
-                    token_to_internal[parts[0]] = int(parts[1])
-        internal_ids = np.vectorize(lambda tok: token_to_internal.get(str(tok), 0))(tokens).astype(np.int32)
-    else:
-        # tokens sont des entiers (ex: ml-100k); force 0-index si nécessaire
-        try:
-            internal_ids = tokens.astype(np.int64)
-        except Exception:
-            internal_ids = np.vectorize(lambda t: int(str(t)) if str(t).isdigit() else 0)(tokens).astype(np.int64)
-        if internal_ids.size and internal_ids.min() > 0:
-            internal_ids = internal_ids - 1
-        internal_ids = internal_ids.astype(np.int32)
-
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    with open(save_path, "wb") as f:
-        f.write(struct.pack("<i", num_sessions))
-        f.write(struct.pack("<i", K))
-        f.write(internal_ids.ravel().tobytes())
-    logger.info(set_color("submission saved", "yellow") + f": {save_path}")
-
-    return test_result
 
 def run(
     model,
@@ -227,24 +160,7 @@ def run_recbole(
         logger.info(f"Loading model checkpoint from {config['resume_path']}")
         trainer.resume_checkpoint(config["resume_path"])
 
-    # model training
-    # best_valid_score, best_valid_result = trainer.fit(
-    #     train_data, valid_data, saved=saved, show_progress=config["show_progress"]
-    # )
-    # if not config.get("eval_only", False):
-    #     best_valid_score, best_valid_result = trainer.fit(
-    #         train_data, valid_data, saved=saved, show_progress=config["show_progress"]
-    #     )
-    # else:
-    #     logger.info("Eval-only: skipping training, using resumed checkpoint.")
-    #     best_valid_score, best_valid_result = None, None
 
-    # model evaluation
-    # test_result = trainer.evaluate(
-    #     test_data, load_best_model=saved, show_progress=config["show_progress"]
-    # )
-    
-    # eval_only flag (Config n'a pas .get)
     eval_only = config["eval_only"] if "eval_only" in config else False
 
     # model training (skipped in eval_only mode)
@@ -263,9 +179,7 @@ def run_recbole(
         show_progress=config["show_progress"],
     )
     
-    # test_result = evaluate_and_export(trainer, test_data, config, saved, eval_only, train_data, model)
 
-    # tune.report(**test_result)
     logger.info(set_color("test result", "yellow") + f": {test_result}")
     environment_tb = get_environment(config)
     logger.info(
@@ -337,14 +251,14 @@ def objective_function(config_dict=None, config_file_list=None, saved=True):
     best_valid_score, best_valid_result = trainer.fit(
         train_data, valid_data, verbose=False, saved=saved
     )
-    # test_result = trainer.evaluate(test_data, load_best_model=saved)
+
     eval_only = config["eval_only"] if "eval_only" in config else False
     test_result = trainer.evaluate(
         test_data,
         load_best_model=(saved and not eval_only),
         show_progress=config["show_progress"],
     )
-    # test_result = evaluate_and_export(trainer, test_data, config, saved, eval_only, train_data, model)
+    
     logger.info(set_color("test result", "yellow") + f": {test_result}")
     tune.report(**test_result)
     return {
